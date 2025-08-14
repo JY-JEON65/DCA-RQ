@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>DCA-RQ Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+        .container-fluid {
+            background-color: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 16px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        .header-button {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .header-button.active {
+            background-color: #555;
+        }
+        .header-button .material-icons {
+            margin-right: 8px;
+        }
+        .display-box {
+            background-color: #000;
+            border: 1px solid #555;
+            border-radius: 5px;
+            text-align: center;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .display-box-yellow {
+            background-color: #000;
+            border: 2px solid #facc15;
+            border-radius: 5px;
+            text-align: center;
+            padding: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #facc15;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .data-box {
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 12px;
+            height: 100%;
+            min-width: 0;
+        }
+        .data-title {
+            color: #ccc;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .data-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #facc15;
+            font-family: 'Digital-7', sans-serif;
+            word-break: break-word;
+        }
+        .data-value.green {
+            color: #34d399; /* Tailwind CSS의 green-400에 해당하는 색상 */
+        }
+        .data-value-small {
+            font-size: 36px;
+            font-weight: bold;
+            color: #facc15;
+            font-family: 'Digital-7', sans-serif;
+            word-break: break-word;
+        }
+        .data-label {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .data-setting {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .footer-button {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            white-space: nowrap;
+        }
+        .footer-button.active {
+            color: #facc15;
+        }
+        .footer-button .material-icons {
+            margin-right: 8px;
+        }
+        .control-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .control-indicator {
+            width: 32px;
+            height: 18px;
+            border: 1px solid #666;
+            border-radius: 3px;
+            background-color: #444;
+            margin-right: 8px;
+        }
+        .control-label {
+            font-size: 14px;
+        }
+
+        /* 깜박임 효과를 위한 CSS 추가 */
+        @keyframes blink-5times {
+            0%, 20%, 40%, 60%, 80%, 100% { opacity: 1; }
+            10%, 30%, 50%, 70%, 90% { opacity: 0; }
+        }
+        .blinking {
+            animation: blink-5times 1.5s ease-in-out;
+        }
+
+        /* 드롭다운 메뉴 스타일 (모바일 전용) */
+        .dropdown {
+            position: relative;
+            display: none; /* 기본적으로 숨김 */
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            border: 1px solid #555;
+            top: 100%;
+            left: 0;
+        }
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        .dropdown-content a:hover {
+            background-color: #555;
+        }
+        .dropdown-content a .material-icons {
+            margin-right: 8px;
+        }
+        .show {
+            display: block;
+        }
+
+        /* 모바일 대응을 위한 미디어 쿼리 */
+        @media (max-width: 768px) {
+            .grid-cols-12 {
+                grid-template-columns: repeat(1, 1fr);
+            }
+            .grid-cols-6 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .header-button {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            .header-button .material-icons {
+                margin-right: 4px;
+                font-size: 16px;
+            }
+            .data-value {
+                font-size: 36px;
+            }
+            .data-value-small {
+                font-size: 28px;
+            }
+            .footer-button {
+                padding: 6px 4px;
+                font-size: 10px;
+            }
+            .footer-button .material-icons {
+                margin-right: 4px;
+                font-size: 14px;
+            }
+            /* 모바일에서만 드롭다운 메뉴 표시 */
+            .dropdown {
+                display: inline-block;
+            }
+            /* 모바일에서는 기존 메뉴 숨김 */
+            .menu-container {
+                display: none !important;
+            }
+            /* 드롭다운 메뉴 모바일 스타일 */
+            .dropdown-content {
+                min-width: 140px;
+            }
+            .dropdown-content a {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            /* 하단 버튼 그룹 조정 */
+            .footer-buttons {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 2px;
+            }
+        }
+    </style>
+    <script>
+        function calculateStorageDays() {
+            const startDate = new Date('2025-06-09');
+            const today = new Date();
+            const timeDiff = today - startDate;
+            const dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            return dayDiff;
+        }
+
+        function calculateCurrentStageDays() {
+            const startDate = new Date('2025-08-01');
+            const today = new Date();
+            const timeDiff = today - startDate;
+            const dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            return dayDiff;
+        }
+
+        // 특정 범위의 랜덤 값을 생성하는 함수
+        function getRandomValue(min, max, decimalPlaces) {
+            const random = Math.random() * (max - min) + min;
+            return random.toFixed(decimalPlaces);
+        }
+
+        // 드롭다운 메뉴 토글 함수 (모바일 전용)
+        function toggleDropdown() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
+
+        // 드롭다운 외부 클릭 시 닫기 (모바일 전용)
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        window.onload = function() {
+            const totalDays = calculateStorageDays();
+            document.getElementById('storage-period').value = totalDays + '일';
+
+            const currentStageDays = calculateCurrentStageDays();
+            document.getElementById('current-stage-period').value = currentStageDays + '일';
+            
+            // 각 데이터 요소에 ID를 할당합니다.
+            const tempValueElement = document.getElementById('temp-value');
+            const humidValueElement = document.getElementById('humid-value');
+            const o2ValueElement = document.getElementById('o2-value');
+            const co2ValueElement = document.getElementById('co2-value');
+
+            // 1시간(3,600,000ms)마다 값을 업데이트합니다.
+            setInterval(() => {
+                tempValueElement.textContent = getRandomValue(1.0, 2.0, 1) + '°C';
+                humidValueElement.textContent = getRandomValue(87.0, 94.0, 1) + '%';
+                o2ValueElement.textContent = getRandomValue(2.00, 6.00, 2) + '%';
+                co2ValueElement.textContent = getRandomValue(0.00, 1.00, 2) + '%';
+            }, 3600000); 
+
+            // RQ 값 업데이트 및 깜박임 기능 추가
+            const rqValueElement = document.getElementById('rq-value');
+            
+            function updateRqValue() {
+                const randomValue = getRandomValue(1.30, 1.50, 2);
+                rqValueElement.textContent = randomValue;
+
+                rqValueElement.classList.add('blinking');
+                setTimeout(() => {
+                    rqValueElement.classList.remove('blinking');
+                }, 1500); // 1.5초(1500ms) 후에 blinking 클래스 제거
+            }
+
+            // 페이지 로딩 시 즉시 실행
+            updateRqValue();
+
+            // 30초(30000ms)마다 반복
+            setInterval(updateRqValue, 30000);
+        };
+    </script>
+</head>
+<body class="p-2 sm:p-4">
+<div class="container-fluid mx-auto">
+    <div class="flex justify-between items-center mb-4">
+        <button class="text-white p-2 rounded-full bg-gray-700 border border-gray-500">
+            <span class="material-icons text-3xl sm:text-4xl text-green-400">power_settings_new</span>
+        </button>
+        <div class="menu-container flex space-x-1 overflow-x-auto md:overflow-visible">
+            <button class="header-button active">
+                <span class="material-icons">home</span>MAIN
+            </button>
+            <a href="air_volume_calculator.html" class="header-button">
+                <span class="material-icons">wysiwyg</span>STATUS <span class="text-xs ml-1">DIGITAL</span>
+            </a>
+            <a href="nitrogen_air_dashboard.html" class="header-button">
+                <span class="material-icons">sensors</span>STATUS <span class="text-xs ml-1">ANALOG</span>
+            </a>
+            <button class="header-button">
+                <span class="material-icons">notifications</span>ALARM
+            </button>
+            <button class="header-button">
+                <span class="material-icons">trending_up</span>TREND
+            </button>
+            <a href="DCA-RQ1.html" class="header-button">
+                <span class="material-icons">menu</span>RQ-setting
+            </a>
+        </div>
+        <div class="dropdown">
+            <button onclick="toggleDropdown()" class="header-button dropbtn">
+                <span class="material-icons">menu</span>MENU
+            </button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="#" class="active">
+                    <span class="material-icons">home</span>MAIN
+                </a>
+                <a href="air_volume_calculator.html">
+                    <span class="material-icons">wysiwyg</span>STATUS DIGITAL
+                </a>
+                <a href="nitrogen_air_dashboard.html">
+                    <span class="material-icons">sensors</span>STATUS ANALOG
+                </a>
+                <a href="#">
+                    <span class="material-icons">notifications</span>ALARM
+                </a>
+                <a href="#">
+                    <span class="material-icons">trending_up</span>TREND
+                </a>
+                <a href="DCA-RQ1.html">
+                    <span class="material-icons">settings</span>RQ-setting
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 sm:col-span-3 flex flex-col justify-center items-center">
+            <input class="display-box-yellow w-full text-center" type="text" value="DCA-RQ"/>
+        </div>
+        <div class="col-span-12 sm:col-span-3">
+            <div class="text-center text-lg mb-2">품 목</div>
+            <input class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="봄배추(문경)"/>
+            <div class="text-center text-lg mt-2">총 저장기간</div>
+            <input id="storage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="164일" readonly/>
+        </div>
+        <div class="col-span-12 sm:col-span-3">
+            <div class="text-center text-lg mb-2">현재 단계</div>
+            <input class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="3단계"/>
+            <div class="text-center text-lg mt-2">현재단계 저장기간</div>
+            <input id="current-stage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="0일" readonly/>
+        </div>
+        <div class="col-span-12 sm:col-span-3 flex flex-col justify-center space-y-2">
+            <div class="control-item">
+                <img src="button-on.png" alt="O₂ 조절" class="control-indicator"/>
+                <div class="control-label">O₂ 조절</div>
+            </div>
+            <div class="control-item">
+                <img src="button-on.png" alt="CO₂ 조절" class="control-indicator"/>
+                <div class="control-label">CO₂ 조절</div>
+            </div>
+            <div class="control-item">
+                <img src="button-off.png" alt="O₂ 수동제어" class="control-indicator"/>
+                <div class="control-label">O₂ 수동제어</div>
+            </div>
+        </div>
+    </div>
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box">
+            <div class="data-title">온도 (°C)</div>
+            <div class="data-value" id="temp-value">0.7<span class="text-2xl">°C</span></div>
+            <div class="mt-2">
+                <div class="data-setting">
+                    <span class="data-label">설정 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="0.0°C"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">범위 :</span>
+                    <input class="bg-transparent text-right text-white w-1/2" type="text" value="-2.0°C"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label"></span>
+                    <span>~</span> <input class="bg-transparent text-right text-white w-1/2" type="text" value="2.0°C"/>
+                </div>
+            </div>
+            <div class="border-t border-gray-600 my-3"></div>
+            <div class="data-title">습도 (%)</div>
+            <div class="data-value-small" id="humid-value">90.4<span class="text-xl">%</span></div>
+        </div>
+        <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box">
+            <div class="data-title">O₂ (%)</div>
+            <div class="data-value" id="o2-value">3.75<span class="text-2xl">%</span></div>
+            <div class="mt-2 space-y-1">
+                <div class="data-setting">
+                    <span class="data-label">O₂상한 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="7.00%"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">제어상한 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="6.00%"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">설정 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="3.00%"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">제어하한 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="2.00%"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">O₂하한 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="1.00%"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box">
+            <div class="data-title">CO₂ (%)</div>
+            <div class="data-value" id="co2-value">0.04<span class="text-2xl">%</span></div>
+            <div class="mt-2 space-y-1">
+                <div class="data-setting">
+                    <span class="data-label">설정 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="1.00%"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">±</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="1.00%"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box border-yellow-400">
+            <div class="data-title">R Q</div>
+            <div class="data-value green" id="rq-value">1.40</div>
+            <div class="mt-2 space-y-1">
+                <div class="data-setting">
+                    <span class="data-label">설정 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="1.40"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label">범위 :</span>
+                    <input class="bg-transparent text-right text-white" type="text" value="1.30"/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label"></span>
+                    <span>~</span> <input class="bg-transparent text-right text-white w-16" type="text" value="1.50"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid grid-cols-6 gap-2 footer-buttons">
+        <button class="footer-button active">
+            <span class="material-icons">ac_unit</span>COOLING
+        </button>
+        <button class="footer-button">
+            <span class="material-icons">whatshot</span>HEATING
+        </button>
+        <button class="footer-button">
+            <span class="material-icons">water_drop</span>HUMIDI
+        </button>
+        <button class="footer-button">
+            <span class="material-icons">air</span>DEHUMIDI
+        </button>
+        <button class="footer-button">
+            <span class="material-icons">severe_cold</span>DEFROST
+        </button>
+        <button class="footer-button">
+            <span class="material-icons">error_outline</span>FAULT
+        </button>
+    </div>
+</div>
+</body>
+</html>
