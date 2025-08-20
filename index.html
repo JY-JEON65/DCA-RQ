@@ -283,13 +283,13 @@
             const o2ValueElement = document.getElementById('o2-value');
             const co2ValueElement = document.getElementById('co2-value');
 
-            // 1시간(3,600,000ms)마다 값을 업데이트합니다.
+            // 10분(600,000ms)마다 값을 업데이트합니다.
             setInterval(() => {
                 tempValueElement.textContent = getRandomValue(1.0, 2.0, 1) + '°C';
                 humidValueElement.textContent = getRandomValue(87.0, 94.0, 1) + '%';
                 o2ValueElement.textContent = getRandomValue(2.00, 6.00, 2) + '%';
                 co2ValueElement.textContent = getRandomValue(0.00, 1.00, 2) + '%';
-            }, 3600000); 
+            }, 600000); 
 
             // RQ 값 업데이트 및 깜박임 기능 추가
             const rqValueElement = document.getElementById('rq-value');
@@ -307,8 +307,8 @@
             // 페이지 로딩 시 즉시 실행
             updateRqValue();
 
-            // 30초(30000ms)마다 반복
-            setInterval(updateRqValue, 30000);
+            // 10초(10000ms)마다 반복
+            setInterval(updateRqValue, 10000);
         };
     </script>
 </head>
