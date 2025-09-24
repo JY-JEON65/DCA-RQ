@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
@@ -82,6 +82,10 @@
         .data-value.green {
             color: #34d399; /* Tailwind CSS의 green-400에 해당하는 색상 */
         }
+        /* 마이너스 값에 대한 빨간색 스타일 추가 */
+        .data-value.red {
+            color: #ef4444; /* Tailwind CSS의 red-500에 해당하는 색상 */
+        }
         .data-value-small {
             font-size: 36px;
             font-weight: bold;
@@ -132,7 +136,7 @@
             font-size: 14px;
         }
 
-        /* 깜박임 효과를 위한 CSS 추가 */
+        /* 깜빡임 효과를 위한 CSS 추가 */
         @keyframes blink-5times {
             0%, 20%, 40%, 60%, 80%, 100% { opacity: 1; }
             10%, 30%, 50%, 70%, 90% { opacity: 0; }
@@ -228,94 +232,28 @@
                 gap: 2px;
             }
         }
+        .negative-value {
+            color: #ef4444; /* 마이너스 값에 대한 빨간색 스타일 추가 */
+        }
+
+        /* 기본 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .numeric-value {
+            font-weight: bold; /* 숫자 값 강조 */
+        }
+        
+        /* 음수 값에 대한 빨간색 스타일 추가 */
+        .red-text {
+            color: #ef4444 !important;
+        }
     </style>
-    <script>
-        function calculateStorageDays() {
-            const startDate = new Date('2025-06-09');
-            const today = new Date();
-            const timeDiff = today - startDate;
-            const dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-            return dayDiff;
-        }
-
-        function calculateCurrentStageDays() {
-            const startDate = new Date('2025-08-01');
-            const today = new Date();
-            const timeDiff = today - startDate;
-            const dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-            return dayDiff;
-        }
-
-        // 특정 범위의 랜덤 값을 생성하는 함수
-        function getRandomValue(min, max, decimalPlaces) {
-            const random = Math.random() * (max - min) + min;
-            return random.toFixed(decimalPlaces);
-        }
-
-        // 드롭다운 메뉴 토글 함수 (모바일 전용)
-        function toggleDropdown() {
-            document.getElementById("myDropdown").classList.toggle("show");
-        }
-
-        // 드롭다운 외부 클릭 시 닫기 (모바일 전용)
-        window.onclick = function(event) {
-            if (!event.target.matches('.dropbtn')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
-
-        window.onload = function() {
-            const totalDays = calculateStorageDays();
-            document.getElementById('storage-period').value = totalDays + '일';
-
-            const currentStageDays = calculateCurrentStageDays();
-            document.getElementById('current-stage-period').value = currentStageDays + '일';
-            
-            // 각 데이터 요소에 ID를 할당합니다.
-            const tempValueElement = document.getElementById('temp-value');
-            const humidValueElement = document.getElementById('humid-value');
-            const o2ValueElement = document.getElementById('o2-value');
-            const co2ValueElement = document.getElementById('co2-value');
-
-            // 10분(600,000ms)마다 값을 업데이트합니다.
-            setInterval(() => {
-                tempValueElement.textContent = getRandomValue(1.0, 2.0, 1) + '°C';
-                humidValueElement.textContent = getRandomValue(87.0, 94.0, 1) + '%';
-                o2ValueElement.textContent = getRandomValue(2.00, 6.00, 2) + '%';
-                co2ValueElement.textContent = getRandomValue(0.00, 1.00, 2) + '%';
-            }, 600000); 
-
-            // RQ 값 업데이트 및 깜박임 기능 추가
-            const rqValueElement = document.getElementById('rq-value');
-            
-            function updateRqValue() {
-                const randomValue = getRandomValue(1.30, 1.50, 2);
-                rqValueElement.textContent = randomValue;
-
-                rqValueElement.classList.add('blinking');
-                setTimeout(() => {
-                    rqValueElement.classList.remove('blinking');
-                }, 1500); // 1.5초(1500ms) 후에 blinking 클래스 제거
-            }
-
-            // 페이지 로딩 시 즉시 실행
-            updateRqValue();
-
-            // 10초(10000ms)마다 반복
-            setInterval(updateRqValue, 10000);
-        };
-    </script>
 </head>
 <body class="p-2 sm:p-4">
 <div class="container-fluid mx-auto">
     <div class="flex justify-between items-center mb-4">
-        <button class="text-white p-2 rounded-full bg-gray-700 border border-gray-500">
+        <button id="home-button" class="text-white p-2 rounded-full bg-gray-700 border border-gray-500">
             <span class="material-icons text-3xl sm:text-4xl text-green-400">power_settings_new</span>
         </button>
         <div class="menu-container flex space-x-1 overflow-x-auto md:overflow-visible">
@@ -334,7 +272,7 @@
             <button class="header-button">
                 <span class="material-icons">trending_up</span>TREND
             </button>
-            <a href="DCA-RQ1.html" class="header-button">
+            <a href="DCA-RQ0.html" class="header-button">
                 <span class="material-icons">menu</span>RQ-setting
             </a>
         </div>
@@ -358,7 +296,7 @@
                 <a href="#">
                     <span class="material-icons">trending_up</span>TREND
                 </a>
-                <a href="DCA-RQ1.html">
+                <a href="DCA-RQ0.html">
                     <span class="material-icons">settings</span>RQ-setting
                 </a>
             </div>
@@ -369,16 +307,20 @@
             <input class="display-box-yellow w-full text-center" type="text" value="DCA-RQ"/>
         </div>
         <div class="col-span-12 sm:col-span-3">
-            <div class="text-center text-lg mb-2">품 목</div>
-            <input class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="봄배추(문경)"/>
-            <div class="text-center text-lg mt-2">총 저장기간</div>
-            <input id="storage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="164일" readonly/>
+            <div class="text-center text-lg mb-2">품목</div>
+            <input id="item" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="봄배추(문경)"/>
+            <div class="text-center text-lg mt-2">이 저장기간</div>
+            <input id="storage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="" readonly/>
+            <div class="text-center text-sm mt-2">저장 시작일</div>
+            <input id="storage-start-date" class="display-box w-full text-base font-bold text-yellow-400" type="date"/>
         </div>
         <div class="col-span-12 sm:col-span-3">
             <div class="text-center text-lg mb-2">현재 단계</div>
-            <input class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="3단계"/>
+            <input id="current-stage" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value=""/>
             <div class="text-center text-lg mt-2">현재단계 저장기간</div>
-            <input id="current-stage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="0일" readonly/>
+            <input id="current-stage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="" readonly/>
+            <div class="text-center text-sm mt-2">현재단계 시작일</div>
+            <input id="current-stage-start-date" class="display-box w-full text-base font-bold text-yellow-400" type="date"/>
         </div>
         <div class="col-span-12 sm:col-span-3 flex flex-col justify-center space-y-2">
             <div class="control-item">
@@ -398,80 +340,90 @@
     <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box">
             <div class="data-title">온도 (°C)</div>
-            <div class="data-value" id="temp-value">0.7<span class="text-2xl">°C</span></div>
+            <div class="data-value" id="temp-value"></div>
             <div class="mt-2">
                 <div class="data-setting">
                     <span class="data-label">설정 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="0.0°C"/>
+                    <input id="temp-setting-val" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">범위 :</span>
-                    <input class="bg-transparent text-right text-white w-1/2" type="text" value="-2.0°C"/>
+                    <input id="temp-range-min" class="bg-transparent text-right text-white w-1/2" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label"></span>
-                    <span>~</span> <input class="bg-transparent text-right text-white w-1/2" type="text" value="2.0°C"/>
+                    <span>~</span> <input id="temp-range-max" class="bg-transparent text-right text-white w-1/2" type="text" value=""/>
                 </div>
             </div>
             <div class="border-t border-gray-600 my-3"></div>
             <div class="data-title">습도 (%)</div>
-            <div class="data-value-small" id="humid-value">90.4<span class="text-xl">%</span></div>
+            <div class="data-value-small" id="humid-value"></div>
+            <div class="mt-2">
+                <div class="data-setting">
+                    <span class="data-label">범위 :</span>
+                    <input id="humid-range-min" class="bg-transparent text-right text-white w-1/2" type="text" value=""/>
+                </div>
+                <div class="data-setting">
+                    <span class="data-label"></span>
+                    <span>~</span> <input id="humid-range-max" class="bg-transparent text-right text-white w-1/2" type="text" value=""/>
+                </div>
+            </div>
         </div>
         <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box">
             <div class="data-title">O₂ (%)</div>
-            <div class="data-value" id="o2-value">3.75<span class="text-2xl">%</span></div>
+            <div class="data-value" id="o2-value"></div>
             <div class="mt-2 space-y-1">
                 <div class="data-setting">
                     <span class="data-label">O₂상한 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="7.00%"/>
+                    <input id="o2-upper-limit" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">제어상한 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="6.00%"/>
+                    <input id="o2-control-upper" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">설정 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="3.00%"/>
+                    <input id="o2-setting" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">제어하한 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="2.00%"/>
+                    <input id="o2-control-lower" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">O₂하한 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="1.00%"/>
+                    <input id="o2-lower-limit" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
             </div>
         </div>
         <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box">
             <div class="data-title">CO₂ (%)</div>
-            <div class="data-value" id="co2-value">0.04<span class="text-2xl">%</span></div>
+            <div class="data-value" id="co2-value"></div>
             <div class="mt-2 space-y-1">
                 <div class="data-setting">
                     <span class="data-label">설정 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="1.00%"/>
+                    <input id="co2-setting" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">±</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="1.00%"/>
+                    <input id="co2-deviation" class="bg-transparent text-right text-white" type="text" value="1.00%"/>
                 </div>
             </div>
         </div>
         <div class="col-span-12 sm:col-span-6 md:col-span-3 data-box border-yellow-400">
             <div class="data-title">R Q</div>
-            <div class="data-value green" id="rq-value">1.40</div>
+            <div class="data-value green" id="rq-value"></div>
             <div class="mt-2 space-y-1">
                 <div class="data-setting">
                     <span class="data-label">설정 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="1.40"/>
+                    <input id="rq-setting-val" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label">범위 :</span>
-                    <input class="bg-transparent text-right text-white" type="text" value="1.30"/>
+                    <input id="rq-range-min" class="bg-transparent text-right text-white" type="text" value=""/>
                 </div>
                 <div class="data-setting">
                     <span class="data-label"></span>
-                    <span>~</span> <input class="bg-transparent text-right text-white w-16" type="text" value="1.50"/>
+                    <span>~</span> <input id="rq-range-max" class="bg-transparent text-right text-white w-16" type="text" value=""/>
                 </div>
             </div>
         </div>
@@ -497,5 +449,305 @@
         </button>
     </div>
 </div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    // 전역 변수 선언
+    let supabase = null;
+    let currentDataId = null;
+    
+    // 특정 범위의 랜덤 값을 소수점 지정 자리까지 생성하는 함수
+    function getRandomValue(min, max, decimalPlaces) {
+        const random = Math.random() * (max - min) + min;
+        return random.toFixed(decimalPlaces);
+    }
+
+    // 드롭다운 메뉴 토글 함수 (모바일 전용)
+    function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // 드롭다운 외부 클릭 시 닫기 (모바일 전용)
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+    // Supabase 초기화 및 데이터 가져오기
+    function initializeSupabase() {
+        try {
+            // Supabase가 로드되었는지 확인
+            if (typeof window.supabase === 'undefined') {
+                console.error('Supabase library not loaded');
+                return false;
+            }
+            
+            // config.js에서 설정값 가져오기
+            let SUPABASE_URL, SUPABASE_ANON_KEY;
+            
+            if (typeof window.SUPABASE_CONFIG !== 'undefined') {
+                // config.js 파일이 있는 경우 - 키 이름 수정
+                SUPABASE_URL = window.SUPABASE_CONFIG.SUPABASE_URL;
+                SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.SUPABASE_ANON_KEY;
+            } else {
+              // config.js 파일이 없는 경우 직접 설정 (개발용)
+             //  SUPABASE_URL = 'https://khytzjktxmqdaftjfmsq.supabase.co';
+             //  SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoeXR6amt0eG1xZGFmdGpmbXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxOTc1NTAsImV4cCI6MjA2OTc3MzU1MH0.GXMY5r3cgivmcGBRULqDB5faBUTYR9jf3MHxt4dtfBc';
+                console.warn('config.js 파일을 사용하는 것을 권장합니다.');
+            }
+            
+            if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+                console.error('Supabase 설정값이 없습니다.');
+                return false;
+            }
+            
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase 초기화 성공');
+            return true;
+        } catch (error) {
+            console.error('Failed to initialize Supabase:', error);
+            return false;
+        }
+    }
+
+    // 값에 따라 텍스트 색상을 업데이트하는 함수 (개선됨)
+    function updateValueColor(element, value) {
+        element.textContent = value;
+        element.classList.remove('red', 'green', 'text-yellow-400'); // 기존 색상 클래스 제거
+
+        // 값에서 숫자 부분만 추출 (음수 포함)
+        const numericValueMatch = value.match(/-?\d+(\.\d+)?/);
+        const numericValue = numericValueMatch ? parseFloat(numericValueMatch[0]) : NaN;
+
+        if (!isNaN(numericValue) && numericValue < 0) {
+            element.classList.add('red');
+        } else if (value.includes('%') || value.includes('°C')) {
+            element.classList.add('text-yellow-400');
+        } else {
+            element.classList.add('green');
+        }
+    }
+
+    // 음수 값을 체크하고 빨간색으로 표시하는 함수
+    function checkAndApplyNegativeStyle(element, value) {
+        // 숫자 부분만 추출 (음수 포함)
+        const numericValueMatch = value.toString().match(/-?\d+(\.\d+)?/);
+        const numericValue = numericValueMatch ? parseFloat(numericValueMatch[0]) : NaN;
+        
+        if (!isNaN(numericValue) && numericValue < 0) {
+            element.classList.add('red-text');
+        } else {
+            element.classList.remove('red-text');
+        }
+    }
+
+    async function fetchDataAndUpdateUI() {
+        try {
+            // Supabase 초기화 확인
+            if (!supabase) {
+                if (!initializeSupabase()) {
+                    console.error('Supabase initialization failed');
+                    return;
+                }
+            }
+
+            // dca_rqm 테이블에서 데이터 불러오기
+            const { data: dca_rqm_data, error: rqmError } = await supabase
+                .from('dca_rqm')
+                .select('*')
+                .limit(1);
+
+            if (rqmError) {
+                console.error('Database error:', rqmError);
+                return;
+            }
+
+            if (!dca_rqm_data || dca_rqm_data.length === 0) {
+                console.error('No data found in dca_rqm table');
+                return;
+            }
+            
+            const rqm = dca_rqm_data[0];
+            currentDataId = rqm.id;
+
+            // 저장일자 계산 및 표시
+            const storageStartDate = new Date(rqm.storage_start_date);
+            const currentStageStartDate = new Date(rqm.current_stage_start_date);
+            const today = new Date();
+            const totalDays = Math.floor((today - storageStartDate) / (1000 * 60 * 60 * 24));
+            const currentStageDays = Math.floor((today - currentStageStartDate) / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('item').value = rqm.item;
+            document.getElementById('storage-period').value = `${totalDays}일`;
+            document.getElementById('current-stage').value = `${rqm.current_stage}`;
+            document.getElementById('current-stage-period').value = `${currentStageDays}일`;
+            
+            // Populate new date input fields with DB values
+            document.getElementById('storage-start-date').value = rqm.storage_start_date.substring(0, 10);
+            document.getElementById('current-stage-start-date').value = rqm.current_stage_start_date.substring(0, 10);
+
+            // 설정값 업데이트 (온도/습도는 소수점 한자리, 나머지는 둘째자리) 및 음수 체크
+            const tempSettingVal = `${rqm.temperature_setting.toFixed(1)}°C`;
+            const tempRangeMin = `${rqm.temperature_range_min.toFixed(1)}°C`;
+            const tempRangeMax = `${rqm.temperature_range_max.toFixed(1)}°C`;
+            const humidRangeMin = `${rqm.humidity_range_min.toFixed(1)}%`;
+            const humidRangeMax = `${rqm.humidity_range_max.toFixed(1)}%`;
+            
+            document.getElementById('temp-setting-val').value = tempSettingVal;
+            document.getElementById('temp-range-min').value = tempRangeMin;
+            document.getElementById('temp-range-max').value = tempRangeMax;
+            document.getElementById('humid-range-min').value = humidRangeMin;
+            document.getElementById('humid-range-max').value = humidRangeMax;
+
+            // 음수 값 체크 및 빨간색 적용
+            checkAndApplyNegativeStyle(document.getElementById('temp-setting-val'), tempSettingVal);
+            checkAndApplyNegativeStyle(document.getElementById('temp-range-min'), tempRangeMin);
+            checkAndApplyNegativeStyle(document.getElementById('temp-range-max'), tempRangeMax);
+
+            document.getElementById('o2-upper-limit').value = `${rqm.o2_upper_limit.toFixed(2)}%`;
+            document.getElementById('o2-control-upper').value = `${rqm.o2_control_upper.toFixed(2)}%`;
+            document.getElementById('o2-setting').value = `${rqm.o2_setting.toFixed(2)}%`;
+            document.getElementById('o2-control-lower').value = `${rqm.o2_control_lower.toFixed(2)}%`;
+            document.getElementById('o2-lower-limit').value = `${rqm.o2_lower_limit.toFixed(2)}%`;
+
+            document.getElementById('co2-setting').value = `${rqm.co2_setting.toFixed(2)}%`;
+            
+            document.getElementById('rq-setting-val').value = `${rqm.rq_setting.toFixed(2)}`;
+            document.getElementById('rq-range-min').value = `${rqm.rq_range_min.toFixed(2)}`;
+            document.getElementById('rq-range-max').value = `${rqm.rq_range_max.toFixed(2)}`;
+            
+            // 랜덤 데이터 업데이트 및 색상 변경 - 모든 값이 정확한 DB 범위 내에서 생성되도록 수정
+            const tempValueElement = document.getElementById('temp-value');
+            const humidValueElement = document.getElementById('humid-value');
+            const o2ValueElement = document.getElementById('o2-value');
+            const co2ValueElement = document.getElementById('co2-value');
+            const rqValueElement = document.getElementById('rq-value');
+            
+            // 온도는 DB에서 설정한 정확한 범위 사용 (소수점 한자리)
+            updateValueColor(tempValueElement, `${getRandomValue(rqm.temperature_range_min, rqm.temperature_range_max, 1)}°C`);
+            updateValueColor(humidValueElement, `${getRandomValue(rqm.humidity_range_min, rqm.humidity_range_max, 1)}%`);
+            updateValueColor(o2ValueElement, `${getRandomValue(rqm.o2_lower_limit, rqm.o2_upper_limit, 2)}%`);
+            
+            // CO2는 설정값 기준 ±편차 범위 내에서 생성
+            const co2Min = Math.max(0, rqm.co2_setting - 1.0); // 최소 0% 이상
+            const co2Max = rqm.co2_setting + 1.0;
+            updateValueColor(co2ValueElement, `${getRandomValue(co2Min, co2Max, 2)}%`);
+
+            // 10초마다 RQ 값 업데이트 및 깜박임
+            function updateRqValue() {
+                const randomValue = parseFloat(getRandomValue(rqm.rq_range_min, rqm.rq_range_max, 2));
+                rqValueElement.textContent = randomValue.toFixed(2);
+                
+                // RQ 값에 따라 색상 클래스 추가
+                if (randomValue < 0) {
+                    rqValueElement.classList.remove('green');
+                    rqValueElement.classList.add('red');
+                } else {
+                    rqValueElement.classList.remove('red');
+                    rqValueElement.classList.add('green');
+                }
+
+                rqValueElement.classList.add('blinking');
+                setTimeout(() => {
+                    rqValueElement.classList.remove('blinking');
+                }, 1500);
+            }
+
+            updateRqValue();
+            setInterval(updateRqValue, 10000);
+
+        } catch (error) {
+            console.error('Error fetching data:', error.message);
+        }
+    }
+
+    // 사용자 입력값을 읽어와서 DB에 업데이트하는 함수
+    async function updateData() {
+        if (!supabase) {
+            console.error('Supabase is not initialized.');
+            return;
+        }
+        if (!currentDataId) {
+            console.error('No data ID to update.');
+            return;
+        }
+
+        try {
+            const updates = {
+                item: document.getElementById('item').value,
+                current_stage: document.getElementById('current-stage').value,
+                storage_start_date: document.getElementById('storage-start-date').value,
+                current_stage_start_date: document.getElementById('current-stage-start-date').value,
+                temperature_setting: parseFloat(document.getElementById('temp-setting-val').value),
+                temperature_range_min: parseFloat(document.getElementById('temp-range-min').value),
+                temperature_range_max: parseFloat(document.getElementById('temp-range-max').value),
+                humidity_range_min: parseFloat(document.getElementById('humid-range-min').value),
+                humidity_range_max: parseFloat(document.getElementById('humid-range-max').value),
+                o2_upper_limit: parseFloat(document.getElementById('o2-upper-limit').value),
+                o2_control_upper: parseFloat(document.getElementById('o2-control-upper').value),
+                o2_setting: parseFloat(document.getElementById('o2-setting').value),
+                o2_control_lower: parseFloat(document.getElementById('o2-control-lower').value),
+                o2_lower_limit: parseFloat(document.getElementById('o2-lower-limit').value),
+                co2_setting: parseFloat(document.getElementById('co2-setting').value),
+                rq_setting: parseFloat(document.getElementById('rq-setting-val').value),
+                rq_range_min: parseFloat(document.getElementById('rq-range-min').value),
+                rq_range_max: parseFloat(document.getElementById('rq-range-max').value),
+            };
+            
+            const { data, error } = await supabase
+                .from('dca_rqm')
+                .update(updates)
+                .eq('id', currentDataId);
+
+            if (error) {
+                console.error('Error updating data:', error);
+                console.error('데이터 업데이트에 실패했습니다. 콘솔을 확인해주세요.');
+            } else {
+                console.log('Data updated successfully:', data);
+                console.log('데이터가 성공적으로 업데이트되었습니다.');
+            }
+        } catch (error) {
+            console.error('Update function failed:', error);
+            console.error('데이터 업데이트 중 오류가 발생했습니다.');
+        }
+    }
+
+    // DOM이 완전히 로드된 후 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        // 약간의 지연 후 초기화 (라이브러리 로딩 시간 확보)
+        setTimeout(() => {
+            initializeSupabase();
+            fetchDataAndUpdateUI();
+        }, 100);
+
+        // 'home-button'에 클릭 이벤트 리스너 추가
+        document.getElementById('home-button').addEventListener('click', updateData);
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const elements = document.querySelectorAll('.numeric-value'); // 숫자 값이 있는 클래스
+        
+        elements.forEach(element => {
+            const value = parseFloat(element.textContent); // 요소의 텍스트를 숫자로 변환
+            
+            // 값이 음수인 경우
+            if (value < 0) {
+                element.style.color = 'red'; // 빨간색으로 변경
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
