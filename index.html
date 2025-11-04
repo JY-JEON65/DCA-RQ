@@ -309,7 +309,7 @@
         <div class="col-span-12 sm:col-span-3">
             <div class="text-center text-lg mb-2">품목</div>
             <input id="item" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="봄배추(문경)"/>
-            <div class="text-center text-lg mt-2">이 저장기간</div>
+            <div class="text-center text-lg mt-2">총 저장기간</div>
             <input id="storage-period" class="display-box w-full text-2xl font-bold text-yellow-400" type="text" value="" readonly/>
             <div class="text-center text-sm mt-2">저장 시작일</div>
             <input id="storage-start-date" class="display-box w-full text-base font-bold text-yellow-400" type="date"/>
@@ -501,7 +501,7 @@
             } else {
               // config.js 파일이 없는 경우 직접 설정 (개발용)
              //  SUPABASE_URL = 'https://khytzjktxmqdaftjfmsq.supabase.co';
-             //  SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoeXR6amt0eG1xZGFmdGpmbXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxOTc1NTAsImV4cCI6MjA2OTc3MzU1MH0.GXMY5r3cgivmcGBRULqDB5faBUTYR9jf3MHxt4dtfBc';
+             //  SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImToeXR6amt0eG1xZGFmdGpmbXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxOTc1NTAsImV4cCI6MjA2OTc3MzU1MH0.GXMY5r3cgivmcGBRULqDB5faBUTYR9jf3MHxt4dtfBc';
                 console.warn('config.js 파일을 사용하는 것을 권장합니다.');
             }
             
@@ -549,6 +549,29 @@
             element.classList.remove('red-text');
         }
     }
+    
+    // 저장기간 계산 로직
+    // 두 날짜(date-only) 간의 일수 차이를 정확하게 계산하는 함수 (시차/DST 문제 해결)
+    function getDaysDifference(startDateString) {
+        // 1. 날짜 문자열에서 날짜 구성 요소만 추출합니다 (YYYY-MM-DD).
+        const dateParts = startDateString.substring(0, 10).split('-').map(Number);
+        
+        // 2. 시작 날짜를 로컬 타임존의 자정으로 설정합니다. (monthIndex는 0부터 시작)
+        const start = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+        // 3. 오늘 날짜를 로컬 타임존의 자정으로 설정합니다.
+        const now = new Date();
+        const todayLocalMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // 4. 밀리초 차이 계산
+        const differenceInTime = todayLocalMidnight.getTime() - start.getTime();
+        
+        // 5. 밀리초를 일수로 변환하고, 반올림하여 DST 변경 등의 오차를 보정합니다. (Math.floor 대신 Math.round 사용)
+        const differenceInDays = Math.round(differenceInTime / (1000 * 60 * 60 * 24));
+        
+        // 결과가 0일보다 작으면 0을 반환합니다. (미래 날짜인 경우)
+        return differenceInDays >= 0 ? differenceInDays : 0;
+    }
 
     async function fetchDataAndUpdateUI() {
         try {
@@ -580,11 +603,8 @@
             currentDataId = rqm.id;
 
             // 저장일자 계산 및 표시
-            const storageStartDate = new Date(rqm.storage_start_date);
-            const currentStageStartDate = new Date(rqm.current_stage_start_date);
-            const today = new Date();
-            const totalDays = Math.floor((today - storageStartDate) / (1000 * 60 * 60 * 24));
-            const currentStageDays = Math.floor((today - currentStageStartDate) / (1000 * 60 * 60 * 24));
+            const totalDays = getDaysDifference(rqm.storage_start_date);
+            const currentStageDays = getDaysDifference(rqm.current_stage_start_date);
             
             document.getElementById('item').value = rqm.item;
             document.getElementById('storage-period').value = `${totalDays}일`;
@@ -669,6 +689,16 @@
             console.error('Error fetching data:', error.message);
         }
     }
+    
+    // 입력값에서 단위 문자를 제거하고 float으로 변환하는 유틸리티 함수
+    function cleanValue(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return NaN;
+        const value = element.value;
+        // 숫자, 소수점(.), 마이너스(-)만 남기고 나머지는 제거
+        const cleaned = value.replace(/[^0-9.\-]/g, ''); 
+        return parseFloat(cleaned);
+    }
 
     // 사용자 입력값을 읽어와서 DB에 업데이트하는 함수
     async function updateData() {
@@ -677,7 +707,8 @@
             return;
         }
         if (!currentDataId) {
-            console.error('No data ID to update.');
+            console.error('No dca_rqm ID to update. Fetch the main data first.');
+            alert('업데이트할 데이터 ID를 찾을 수 없습니다.');
             return;
         }
 
@@ -687,37 +718,70 @@
                 current_stage: document.getElementById('current-stage').value,
                 storage_start_date: document.getElementById('storage-start-date').value,
                 current_stage_start_date: document.getElementById('current-stage-start-date').value,
-                temperature_setting: parseFloat(document.getElementById('temp-setting-val').value),
-                temperature_range_min: parseFloat(document.getElementById('temp-range-min').value),
-                temperature_range_max: parseFloat(document.getElementById('temp-range-max').value),
-                humidity_range_min: parseFloat(document.getElementById('humid-range-min').value),
-                humidity_range_max: parseFloat(document.getElementById('humid-range-max').value),
-                o2_upper_limit: parseFloat(document.getElementById('o2-upper-limit').value),
-                o2_control_upper: parseFloat(document.getElementById('o2-control-upper').value),
-                o2_setting: parseFloat(document.getElementById('o2-setting').value),
-                o2_control_lower: parseFloat(document.getElementById('o2-control-lower').value),
-                o2_lower_limit: parseFloat(document.getElementById('o2-lower-limit').value),
-                co2_setting: parseFloat(document.getElementById('co2-setting').value),
-                rq_setting: parseFloat(document.getElementById('rq-setting-val').value),
-                rq_range_min: parseFloat(document.getElementById('rq-range-min').value),
-                rq_range_max: parseFloat(document.getElementById('rq-range-max').value),
+                
+                // cleanValue 적용
+                temperature_setting: cleanValue('temp-setting-val'),
+                temperature_range_min: cleanValue('temp-range-min'),
+                temperature_range_max: cleanValue('temp-range-max'),
+                humidity_range_min: cleanValue('humid-range-min'),
+                humidity_range_max: cleanValue('humid-range-max'),
+                o2_upper_limit: cleanValue('o2-upper-limit'),
+                o2_control_upper: cleanValue('o2-control-upper'),
+                o2_setting: cleanValue('o2-setting'),
+                o2_control_lower: cleanValue('o2-control-lower'),
+                o2_lower_limit: cleanValue('o2-lower-limit'),
+                co2_setting: cleanValue('co2-setting'),
+                rq_setting: cleanValue('rq-setting-val'),
+                rq_range_min: cleanValue('rq-range-min'),
+                rq_range_max: cleanValue('rq-range-max'),
             };
             
-            const { data, error } = await supabase
+            // =========================================================
+            // [1단계] dca_rqm 테이블 업데이트
+            // =========================================================
+            const { error: rqmError } = await supabase
                 .from('dca_rqm')
                 .update(updates)
                 .eq('id', currentDataId);
 
-            if (error) {
-                console.error('Error updating data:', error);
-                console.error('데이터 업데이트에 실패했습니다. 콘솔을 확인해주세요.');
-            } else {
-                console.log('Data updated successfully:', data);
-                console.log('데이터가 성공적으로 업데이트되었습니다.');
+            if (rqmError) {
+                console.error('Error updating dca_rqm:', rqmError);
+                throw new Error('dca_rqm 업데이트에 실패했습니다.');
             }
+
+            // =========================================================
+            // [2단계] dca_rqs 테이블의 ID를 찾아 item 동기화
+            // =========================================================
+            
+            // dca_rqs의 단일 레코드 ID를 가져옴
+            const { data: rqsData, error: rqsFetchError } = await supabase
+                .from('dca_rqs')
+                .select('id')
+                .limit(1);
+
+            if (rqsFetchError || !rqsData || rqsData.length === 0) {
+                console.warn('dca_rqs 테이블 ID를 찾을 수 없어 품목 동기화를 건너뜁니다.');
+            } else {
+                const rqsId = rqsData[0].id;
+                
+                const { error: rqsUpdateError } = await supabase
+                    .from('dca_rqs')
+                    .update({ item: updates.item }) // <-- 품목 필드만 업데이트
+                    .eq('id', rqsId);
+
+                if (rqsUpdateError) {
+                    console.error('Error updating dca_rqs item:', rqsUpdateError);
+                    throw new Error('dca_rqs 품목 동기화에 실패했습니다.');
+                }
+            }
+            
+            // 성공 메시지 창 제거 (요청에 따라)
+            console.log('Data updated successfully: dca_rqm and dca_rqs item synchronized.');
+
         } catch (error) {
             console.error('Update function failed:', error);
-            console.error('데이터 업데이트 중 오류가 발생했습니다.');
+            // 오류가 발생했을 경우에만 메시지 표시
+            alert(`데이터 업데이트 중 오류가 발생했습니다: ${error.message}`);
         }
     }
 

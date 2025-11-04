@@ -318,6 +318,13 @@
     // 전역 변수 선언
     let supabase = null;
     let dcaRqsData = null;
+    
+    // 🔥 추가된 부분: 입력값에서 단위 문자를 제거하고 float으로 변환하는 유틸리티 함수
+    function cleanAndParse(inputValue) {
+        // 숫자, 소수점(.), 마이너스(-)만 남기고 나머지는 제거
+        const cleaned = inputValue.toString().replace(/[^0-9.\-]/g, ''); 
+        return parseFloat(cleaned);
+    }
 
     // Supabase 초기화 함수
     function initializeSupabase() {
@@ -379,7 +386,10 @@
                 const element = document.getElementById(field.replace(/_/g, '-'));
                 if (element) {
                     const value = dcaRqsData[field];
-                    element.value = (typeof value === 'number' && field.includes('o2-') || field.includes('rq-') || field.includes('alarm-')) ? value.toFixed(2) : value;
+                    // 숫자 값에 대해 소수점 처리 및 음수 색상 처리
+                    const isDecimal = field.includes('o2_') || field.includes('rq_') || field.includes('alarm_');
+                    element.value = (typeof value === 'number' && isDecimal) ? value.toFixed(2) : value;
+                    
                     if (value < 0) {
                         element.classList.add('negative-value');
                     } else {
@@ -399,10 +409,12 @@
 
     async function updateData(event, field) {
         const inputElement = event.target;
-        const value = parseFloat(inputElement.value);
+        // 🔥 수정된 부분: cleanAndParse 적용
+        const value = cleanAndParse(inputElement.value);
 
         if (isNaN(value)) {
             alert('유효한 숫자를 입력하세요.');
+            // 사용자가 잘못된 값을 입력했을 경우, 원래의 DB 값으로 되돌리는 로직을 추가할 수도 있습니다. (선택 사항)
             return;
         }
 
